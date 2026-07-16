@@ -7,6 +7,32 @@ on:
 
 jobs:
 
+  deploy-database:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Clear Existing Database Container
+        run: |
+          docker rm -f bookstacks-db || true
+      
+      - name: Run Database Container
+        run: |
+          docker run -d --name bookstacks-db \
+            -e POSTGRES_USER=bookstacks \
+            -e POSTGRES_PASSWORD=bookstacks \
+            -e POSTGRES_DB=bookstacks \
+            -p 5432:5432 \
+            --network bridge \
+            postgres:13
+      
+      - name: Verify Database Deployment
+        run: |
+          sleep 10
+          docker exec bookstacks-db pg_isready || exit 1
+
   deploy-backend:
     runs-on: self-hosted
 
