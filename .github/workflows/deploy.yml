@@ -7,7 +7,7 @@ on:
       - main
 
   jobs:
-    name: Deploy Backend
+    deploy-backend:
     runs-on: self-hosted
 
     steps:
@@ -31,8 +31,7 @@ on:
         sleep 10
         curl -f http://localhost:5000/ || exit 1
     
-    jobs:
-      name: Deploy Frontend
+      deoploy-frontend:
       runs-on: self-hosted
 
       steps:
