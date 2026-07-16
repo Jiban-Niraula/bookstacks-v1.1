@@ -14,10 +14,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
-      - name: Set up Docker Image
+      - name: Switch to Backend Directory
         run: |
           cd backend
-          docker build -t bookstacks-backend .
       
       - name: Run Backend Container
         run: |
@@ -39,10 +38,9 @@ jobs:
         - name: Checkout Repository
           uses: actions/checkout@v4
         
-        - name: Set up Docker Image
+        - name: Switch to Frontend Directory
           run: |
             cd frontend
-            docker build -t bookstacks-frontend .
         
         - name: Run Frontend Container
           run: |
