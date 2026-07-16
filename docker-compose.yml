@@ -1,0 +1,59 @@
+name: BookStacks
+
+services:
+  database:
+    container_name: bookstacks-db
+    image: postgres:13
+    environment:
+      POSTGRES_USER: bookstacks
+      POSTGRES_PASSWORD: bookstacks
+      POSTGRES_DB: bookstacks
+
+    ports:
+      - "5432:5432"
+
+    # volumes:
+    #   - bookstacks-db-data:/var/lib/postgresql/data
+
+    restart: unless-stopped
+
+    networks:
+      - bookstacks-network
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      BACKEND_URL: http://backend:5000
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped
+
+    networks:
+      - bookstacks-network
+
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    ports:
+      - "5000:5000"
+
+    restart: unless-stopped
+
+    networks:
+      - bookstacks-network
+
+networks:
+  bookstacks-network:
+    driver: bridge
