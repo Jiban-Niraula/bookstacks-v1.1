@@ -69,7 +69,7 @@ jobs:
       - name: Verify Backend
         run: |
           sleep 15
-          curl -f http://localhost:5000/ || exit 1
+          curl -f http://localhost:5000/api/health || exit 1
 
   deploy-frontend:
     runs-on: self-hosted
@@ -90,7 +90,7 @@ jobs:
           docker run -d \
             --name bookstacks-frontend \
             --network bookstacks-network \
-            --env BACKEND_URL=http://bookstacks-backend:5000 \
+            --env BACKEND_URL=http://bookstacks-backend:5000/ \
             -p 3000:3000 \
             bookstacks-frontend
 
