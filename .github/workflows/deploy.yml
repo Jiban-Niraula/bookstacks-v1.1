@@ -56,7 +56,7 @@ jobs:
       - name: Verify Backend Deployment
         run: |
           sleep 10
-          curl -f http://localhost:5000/ || exit 1
+          curl -f http://bookstacks-backend:5000/ || exit 1
     
   deploy-frontend:
     runs-on: self-hosted
@@ -73,7 +73,7 @@ jobs:
         - name: Run Frontend Container
           run: |
             docker run -d --name bookstacks-frontend \
-              --env BACKEND_URL=http://localhost:5000 \
+              --env BACKEND_URL=http://bookstacks-backend:5000 \
               --network bridge \
               -p 3000:3000 \
               bookstacks-frontend
