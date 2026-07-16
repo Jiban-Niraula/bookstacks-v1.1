@@ -14,9 +14,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
-      - name: Switch to Backend Directory
+      - name: Switch to Backend Directory & Clear Existing Containers
         run: |
           cd backend
+          docker rm -f bookstacks-backend || true
       
       - name: Run Backend Container
         run: |
@@ -38,9 +39,10 @@ jobs:
         - name: Checkout Repository
           uses: actions/checkout@v4
         
-        - name: Switch to Frontend Directory
+        - name: Switch to Frontend Directory & Clear Existing Containers
           run: |
             cd frontend
+            docker rm -f bookstacks-frontend || true
         
         - name: Run Frontend Container
           run: |
