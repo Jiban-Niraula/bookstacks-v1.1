@@ -13,72 +13,89 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      
-      - name: Clear Existing Database Container
+
+      # Create Docker network (only once)
+      - name: Create Network
+        run: |
+          docker network create bookstacks-network || true
+
+      # Remove old database container
+      - name: Remove Old Database
         run: |
           docker rm -f bookstacks-db || true
-      
-      - name: Run Database Container
+
+      # Run PostgreSQL
+      - name: Run Database
         run: |
-          docker run -d --name bookstacks-db \
+          docker run -d \
+            --name bookstacks-db \
+            --network bookstacks-network \
             -e POSTGRES_USER=bookstacks \
             -e POSTGRES_PASSWORD=bookstacks \
             -e POSTGRES_DB=bookstacks \
             -p 5432:5432 \
-            --network bridge \
             postgres:13
-      
-      - name: Verify Database Deployment
+
+      # Check database
+      - name: Verify Database
         run: |
           sleep 10
-          docker exec bookstacks-db pg_isready || exit 1
+          docker exec bookstacks-db pg_isready
 
   deploy-backend:
     runs-on: self-hosted
+    needs: deploy-database
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      
-      - name: Switch to Backend Directory & Clear Existing Containers
+
+      # Remove old backend container
+      - name: Remove Old Backend
         run: |
-          cd backend
           docker rm -f bookstacks-backend || true
-      
-      - name: Run Backend Container
+
+      # Run backend
+      - name: Run Backend
         run: |
-          docker run -d --name bookstacks-backend \
+          docker run -d \
+            --name bookstacks-backend \
+            --network bookstacks-network \
             --env-file backend/.env \
             -p 5000:5000 \
-            --network bridge \
             bookstacks-backend
-      
-      - name: Verify Backend Deployment
+
+      # Check backend
+      - name: Verify Backend
         run: |
-          sleep 10
-          curl -f http://bookstacks-backend:5000/ || exit 1
-    
+          sleep 15
+          curl -f http://localhost:5000/ || exit 1
+
   deploy-frontend:
     runs-on: self-hosted
+    needs: deploy-backend
 
     steps:
-        - name: Checkout Repository
-          uses: actions/checkout@v4
-        
-        - name: Switch to Frontend Directory & Clear Existing Containers
-          run: |
-            cd frontend
-            docker rm -f bookstacks-frontend || true
-        
-        - name: Run Frontend Container
-          run: |
-            docker run -d --name bookstacks-frontend \
-              --env BACKEND_URL=http://bookstacks-backend:5000 \
-              --network bridge \
-              -p 3000:3000 \
-              bookstacks-frontend
-        
-        - name: Verify Frontend Deployment
-          run: |
-            sleep 10
-            curl -f http://localhost:3000/ || exit 1
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Remove old frontend container
+      - name: Remove Old Frontend
+        run: |
+          docker rm -f bookstacks-frontend || true
+
+      # Run frontend
+      - name: Run Frontend
+        run: |
+          docker run -d \
+            --name bookstacks-frontend \
+            --network bookstacks-network \
+            --env BACKEND_URL=http://bookstacks-backend:5000 \
+            -p 3000:3000 \
+            bookstacks-frontend
+
+      # Check frontend
+      - name: Verify Frontend
+        run: |
+          sleep 10
+          curl -f http://localhost:3000/ || exit 1
