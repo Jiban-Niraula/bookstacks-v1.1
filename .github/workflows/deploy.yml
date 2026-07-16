@@ -18,7 +18,7 @@ on:
         - name: Set up Docker Image
           run: |
             cd backend
-          docker build -t bookstacks-backend .
+            docker build -t bookstacks-backend .
         
         - name: Run Backend Container
           run: |
