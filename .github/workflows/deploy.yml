@@ -1,1 +1,56 @@
+---
 name: BookStacks
+
+push:
+  branches:
+    - main
+
+  jobs:
+    name: Deploy Backend
+    runs-on: self-hosted
+
+    steps:
+      -name: Checkout Repository
+       uses: actions/checkout@v4
+      
+      -name: Set up Docker Image
+      run: |
+        cd backend
+        docker build -t bookstacks-backend .
+      
+      -name: Run Backend Container
+      run: |
+        docker run -d --name bookstacks-backend \
+          --env-file backend/.env \
+          -p 5000:5000 \
+          bookstacks-backend
+      
+      -name: Verify Backend Deployment
+      run: |
+        sleep 10
+        curl -f http://localhost:5000/ || exit 1
+    
+    jobs:
+      name: Deploy Frontend
+      runs-on: self-hosted
+
+      steps:
+        -name: Checkout Repository
+         uses: actions/checkout@v4
+        
+        -name: Set up Docker Image
+        run: |
+          cd frontend
+          docker build -t bookstacks-frontend .
+        
+        -name: Run Frontend Container
+        run: |
+          docker run -d --name bookstacks-frontend \
+            --env BACKEND_URL=http://localhost:5000 \
+            -p 3000:3000 \
+            bookstacks-frontend
+        
+        -name: Verify Frontend Deployment
+        run: |
+          sleep 10
+          curl -f http://localhost:3000/ || exit 1
