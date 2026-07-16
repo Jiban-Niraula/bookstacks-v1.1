@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BookStacks — Circulation desk</title>
+<meta name="description" content="Browse the catalog, borrow and return books, and track your loans." />
+<link rel="stylesheet" href="/css/styles.css" />
+<script>
+  // No session? Don't even paint the dashboard — straight to the login form.
+  if (!localStorage.getItem('bookstacks_token')) {
+    window.location.replace('/login.html');
+  }
+</script>
+</head>
+<body>
+
+  <header class="topbar">
+    <a href="/index.html" class="brand" style="color: var(--maroon);">
+      <svg class="stamp-mark" width="30" height="30" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="17" cy="17" r="15.5" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/>
+        <path d="M10 13.5C10 12.67 10.67 12 11.5 12H16V22L13 20.5L10 22V13.5Z" fill="currentColor"/>
+        <path d="M24 13.5C24 12.67 23.33 12 22.5 12H18V22L21 20.5L24 22V13.5Z" fill="currentColor"/>
+      </svg>
+      <span>
+        <span class="brand__wordmark">BookStacks</span>
+        <span class="brand__tag">Circulation desk</span>
+      </span>
+    </a>
+
+    <nav class="main-nav">
+      <a href="/index.html" class="main-nav__link main-nav__link--active">Books</a>
+      <a href="/members.html" class="main-nav__link" id="nav-members-link">Members</a>
+    </nav>
+
+    <div class="nav-right">
+      <label class="search-wrap">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="9" r="6.25" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M14 14L17.5 17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search by title, author, or genre…" />
+      </label>
+
+      <div id="user-info">
+        <span class="user-chip">
+          <span class="user-chip__avatar" id="user-avatar"></span>
+          <span>
+            <span id="user-display"></span><br />
+            <span class="user-chip__role" id="user-role"></span>
+          </span>
+        </span>
+        <button type="button" id="logout-btn">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <section class="stats" id="stats">
+      <div class="stat">
+        <span class="stat__value" id="stat-titles">–</span>
+        <span class="stat__label">Titles</span>
+      </div>
+      <div class="stat">
+        <span class="stat__value" id="stat-copies">–</span>
+        <span class="stat__label">Total copies</span>
+      </div>
+      <div class="stat">
+        <span class="stat__value" id="stat-available">–</span>
+        <span class="stat__label">Available</span>
+      </div>
+      <div class="stat">
+        <span class="stat__value" id="stat-borrowed">–</span>
+        <span class="stat__label">Borrowed</span>
+      </div>
+      <div class="stat stat--overdue">
+        <span class="stat__value" id="stat-overdue">–</span>
+        <span class="stat__label">Overdue</span>
+      </div>
+    </section>
+
+    <section class="my-loans" id="my-loans-section">
+      <div class="section-heading">
+        <h2>My borrowed books</h2>
+        <span class="section-heading__meta">14-day loan period</span>
+      </div>
+      <div class="my-loans-card">
+        <div id="my-loans-list"></div>
+        <p class="empty-state" id="my-loans-empty" hidden>You haven't borrowed anything yet — browse the catalog below.</p>
+      </div>
+    </section>
+
+    <div id="admin-panel">
+      <div class="section-heading">
+        <h2>Add a title</h2>
+        <span class="section-heading__meta">Librarian / Super Admin only</span>
+      </div>
+      <div class="accession-card">
+        <p class="accession-card__label">New accession</p>
+        <form id="add-form" class="add-form">
+          <input type="text" name="title" placeholder="Title" required />
+          <input type="text" name="author" placeholder="Author" required />
+          <input type="text" name="genre" placeholder="Genre (optional)" />
+          <input type="number" name="copies" placeholder="Copies" min="1" value="1" />
+          <button type="submit">Add book</button>
+        </form>
+        <p class="error" id="add-error" role="alert"></p>
+      </div>
+    </div>
+
+    <div class="section-heading">
+      <h2>Catalog</h2>
+      <span class="section-heading__meta" id="catalog-count"></span>
+    </div>
+
+    <table class="book-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Genre</th>
+          <th>Copies</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="book-rows"></tbody>
+    </table>
+    <p class="empty-state" id="empty-state" hidden>No books found.</p>
+
+  </main>
+
+  <footer class="site-footer">
+    BookStacks — a small library, run properly.
+  </footer>
+
+  <template id="row-template">
+    <tr>
+      <td class="col-title"></td>
+      <td class="col-author"></td>
+      <td class="col-genre"></td>
+      <td class="col-copies"></td>
+      <td><span class="badge"></span></td>
+      <td class="col-actions">
+        <button class="btn-borrow" type="button">Borrow</button>
+        <button class="btn-return" type="button">Return</button>
+        <button class="btn-delete" type="button" title="Delete">✕</button>
+      </td>
+    </tr>
+    <tr class="row-error-tr">
+      <td colspan="6" class="row-error"></td>
+    </tr>
+  </template>
+
+  <script src="/js/session.js"></script>
+  <script src="/js/permissions.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Members · BookStacks</title>
+<meta name="description" content="Manage library members and issue or return books on their behalf." />
+<link rel="stylesheet" href="/css/styles.css" />
+<script>
+  if (!localStorage.getItem('bookstacks_token')) {
+    window.location.replace('/login.html');
+  }
+</script>
+</head>
+<body>
+
+  <header class="topbar">
+    <a href="/index.html" class="brand" style="color: var(--maroon);">
+      <svg class="stamp-mark" width="30" height="30" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="17" cy="17" r="15.5" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/>
+        <path d="M10 13.5C10 12.67 10.67 12 11.5 12H16V22L13 20.5L10 22V13.5Z" fill="currentColor"/>
+        <path d="M24 13.5C24 12.67 23.33 12 22.5 12H18V22L21 20.5L24 22V13.5Z" fill="currentColor"/>
+      </svg>
+      <span>
+        <span class="brand__wordmark">BookStacks</span>
+        <span class="brand__tag">Circulation desk</span>
+      </span>
+    </a>
+
+    <nav class="main-nav">
+      <a href="/index.html" class="main-nav__link">Books</a>
+      <a href="/members.html" class="main-nav__link main-nav__link--active" id="nav-members-link">Members</a>
+    </nav>
+
+    <div class="nav-right">
+      <div id="user-info">
+        <span class="user-chip">
+          <span class="user-chip__avatar" id="user-avatar"></span>
+          <span>
+            <span id="user-display"></span><br />
+            <span class="user-chip__role" id="user-role"></span>
+          </span>
+        </span>
+        <button type="button" id="logout-btn">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <div class="section-heading">
+      <h2>Members</h2>
+      <span class="section-heading__meta" id="member-count"></span>
+    </div>
+
+    <div class="members-toolbar">
+      <label class="search-wrap">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="9" r="6.25" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M14 14L17.5 17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input type="text" id="member-search" placeholder="Search by name, membership #, phone, or email…" />
+      </label>
+    </div>
+
+    <div id="member-add-panel" style="margin-bottom: 1.5rem;">
+      <div class="section-heading">
+        <h2 style="font-size: 1.1rem;">Add a member</h2>
+        <span class="section-heading__meta">Librarian / Super Admin only</span>
+      </div>
+      <div class="accession-card">
+        <p class="accession-card__label">New membership</p>
+        <form id="member-add-form" class="member-form">
+          <input type="text" name="membershipNumber" placeholder="Membership # (e.g. M-104)" required />
+          <input type="text" name="fullName" placeholder="Full name" required />
+          <input type="text" name="phone" placeholder="Phone (optional)" />
+          <input type="email" name="email" placeholder="Email (optional)" />
+          <button type="submit">Add member</button>
+        </form>
+        <p class="error" id="member-add-error" role="alert"></p>
+      </div>
+    </div>
+
+    <table class="book-table">
+      <thead>
+        <tr>
+          <th>Membership #</th>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th>Active loans</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="member-rows"></tbody>
+    </table>
+    <p class="empty-state" id="member-empty-state" hidden>No members found.</p>
+
+  </main>
+
+  <footer class="site-footer">
+    BookStacks — a small library, run properly.
+  </footer>
+
+  <template id="member-row-template">
+    <tr class="member-row">
+      <td class="col-membership-number"></td>
+      <td class="col-full-name"></td>
+      <td class="col-contact"></td>
+      <td><span class="badge"></span></td>
+      <td class="col-active-loans"></td>
+      <td class="col-actions">
+        <button class="btn-view-member" type="button">View</button>
+        <button class="btn-archive-member" type="button" title="Archive membership">Archive</button>
+      </td>
+    </tr>
+    <tr class="member-detail-tr">
+      <td colspan="6">
+        <div class="member-detail">
+          <div class="member-detail__loans"></div>
+          <p class="empty-state member-detail__no-loans" style="padding: 0.5rem 0; display: none;">No loans yet.</p>
+          <div class="member-detail__issue">
+            <select class="member-detail__book-select"></select>
+            <button type="button" class="member-detail__issue-btn">Issue book</button>
+          </div>
+          <p class="error member-detail__error" role="alert"></p>
+        </div>
+      </td>
+    </tr>
+  </template>
+
+  <script src="/js/session.js"></script>
+  <script src="/js/permissions.js"></script>
+  <script src="/js/members.js"></script>
+</body>
+</html>
